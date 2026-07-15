@@ -1,0 +1,60 @@
+name: Build & publish GonoPBX images
+
+on:
+  workflow_dispatch:
+    inputs:
+      gonopbx_ref:
+        description: "Upstream ankaios76/gonopbx git ref (tag/branch/sha) to build"
+        required: true
+        default: "v2.1.1"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: frontend
+            context: frontend
+            build-args: |
+              VITE_UI_LANG=en
+          - component: backend
+            context: backend
+          - component: asterisk
+            context: asterisk
+    steps:
+      - name: Checkout upstream gonopbx@${{ inputs.gonopbx_ref }}
+        uses: actions/checkout@v4
+        with:
+          repository: ankaios76/gonopbx
+          ref: ${{ inputs.gonopbx_ref }}
+          path: upstream
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.component }}
+        uses: docker/build-push-action@v6
+        with:
+          context: upstream/${{ matrix.context }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: ${{ matrix.build-args }}
+          tags: |
+            ghcr.io/companionintelligence/gonopbx-${{ matrix.component }}:${{ inputs.gonopbx_ref }}
+            ghcr.io/companionintelligence/gonopbx-${{ matrix.component }}:latest
