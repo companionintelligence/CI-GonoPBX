@@ -1,6 +1,12 @@
-# CI-GonoPBX
+<p align="center">
+  <img src="docs/assets/icon.png" width="120" alt="GonoPBX icon" />
+</p>
 
-Build pipeline that publishes container images for [GonoPBX](https://github.com/ankaios76/gonopbx) — an open-source Asterisk PBX web GUI — to `ghcr.io/companionintelligence` so it can be listed in [CI-Marketplace](https://github.com/companionintelligence/CI-Marketplace) (see [issue #700](https://github.com/companionintelligence/CI-Marketplace/issues/700), [PR #703](https://github.com/companionintelligence/CI-Marketplace/pull/703)).
+<h1 align="center">CI-GonoPBX</h1>
+
+<p align="center">
+Build pipeline that publishes container images for <a href="https://github.com/ankaios76/gonopbx">GonoPBX</a> — an open-source Asterisk PBX web GUI — to <code>ghcr.io/companionintelligence</code> so it can be listed in <a href="https://github.com/companionintelligence/CI-Marketplace">CI-Marketplace</a> (see <a href="https://github.com/companionintelligence/CI-Marketplace/issues/700">issue #700</a>, <a href="https://github.com/companionintelligence/CI-Marketplace/pull/703">PR #703</a>).
+</p>
 
 ## Why this repo exists
 
@@ -25,6 +31,77 @@ Upstream's README states the project is "open source and available under the [MI
 
 and link the resolution here.
 
+## Screenshots
+
+Pulled from upstream's own [`website/screenshots`](https://github.com/ankaios76/gonopbx/tree/main/website/screenshots) (linked directly from [issue #700](https://github.com/companionintelligence/CI-Marketplace/issues/700)); mirrored here and in the CI-Marketplace store listing gallery.
+
+| Dashboard | Extensions |
+|---|---|
+| ![Dashboard](docs/assets/01-dashboard.png) | ![Extensions](docs/assets/02-extensions.png) |
+
+| SIP trunks | Call history |
+|---|---|
+| ![SIP trunks](docs/assets/03-sip-trunks.png) | ![Call history](docs/assets/04-call-history.png) |
+
+## Architecture
+
+Four containers per install, isolated on their own compose network. Only the frontend goes through Hub's Traefik proxy — Asterisk needs direct UDP/TCP access for SIP and RTP, which can't go through an HTTP reverse proxy.
+
+```mermaid
+flowchart TB
+    subgraph ext["External"]
+        PHONE["SIP Phones / Softphones"]
+        TRUNK["SIP Trunk Provider"]
+        ADMIN["Admin Browser"]
+    end
+
+    subgraph hub["CI Hub"]
+        TRAEFIK["Traefik reverse proxy"]
+    end
+
+    subgraph app["gonopbx app (isolated compose network)"]
+        FE["gonopbx (frontend)<br/>nginx + React :80"]
+        BE["backend<br/>FastAPI :8000"]
+        AST["asterisk<br/>Asterisk 20<br/>:5060 SIP / :10000-10100 RTP"]
+        PG[("postgres<br/>asterisk_gui")]
+        VOL[("shared volume<br/>/etc/asterisk/custom")]
+    end
+
+    ADMIN -->|HTTPS| TRAEFIK --> FE
+    FE -->|"/api, /ws"| BE
+    BE -->|"AMI :5038"| AST
+    BE -->|SQL| PG
+    BE -. writes pjsip config .-> VOL
+    VOL -. read on boot .-> AST
+    PHONE -->|"SIP :5060"| AST
+    TRUNK -->|"SIP :5060"| AST
+    PHONE <-->|"RTP :10000-10100"| AST
+    TRUNK <-->|"RTP :10000-10100"| AST
+```
+
+Call signaling and CDR logging for a typical inbound call:
+
+```mermaid
+sequenceDiagram
+    participant Trunk as SIP Trunk
+    participant Ast as asterisk
+    participant Ext as Extension (SIP phone)
+    participant BE as backend
+    participant DB as postgres
+
+    Trunk->>Ast: INVITE (inbound call, DID)
+    Ast->>Ast: match DID -> ring group / IVR
+    Ast->>Ext: INVITE (ring)
+    Ext-->>Ast: 200 OK (answered)
+    Ast-->>Trunk: 200 OK
+    Note over Trunk,Ext: RTP media flows directly through Asterisk
+    Ast->>BE: AMI event (call state)
+    BE->>DB: write call detail record
+    Ast->>Ext: BYE (call ends)
+    Ast->>BE: AMI event (hangup)
+    BE->>DB: update CDR
+```
+
 ## Triggering a build
 
 `.github/workflows/build-images.yml` is manually triggered (`workflow_dispatch`) with a `gonopbx_ref` input (the upstream git tag/ref to build, e.g. `v2.1.1`). It builds all three images and pushes them tagged with that ref.
@@ -36,3 +113,7 @@ and link the resolution here.
 1. Confirm all three images pulled successfully on both architectures you intend to support.
 2. Flip `available: true` in `CI-Marketplace/apps/gonopbx/config.json`.
 3. Run `scripts/verify-app.sh --slug gonopbx` against a real Hub instance from the CI-Marketplace repo.
+
+## Icon
+
+The store icon (`docs/assets/icon.png`, source `docs/assets/icon.svg`) is an original vector redraw of GonoPBX's own mark — the broken ring of connected nodes represents extensions/endpoints meshed through the PBX hub, and the center star nods to Asterisk (the engine underneath, and literally "a little star"). The original upstream logo is a wide wordmark lockup (`docs/assets/wordmark.png`) that doesn't crop cleanly to the square tile CI-Marketplace store listings need, so this repo maintains a proper square icon derived from the same visual language instead.

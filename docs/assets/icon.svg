@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14395c"/>
+      <stop offset="100%" stop-color="#1e5082"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4dd8ff"/>
+      <stop offset="100%" stop-color="#1ec8fa"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="108" fill="url(#bg)"/>
+
+  <g stroke="#6fd8ff" stroke-width="8" stroke-linecap="round" opacity="0.85">
+    <line x1="256.0" y1="104.0" x2="387.6" y2="180.0"/>
+    <line x1="387.6" y1="180.0" x2="387.6" y2="332.0"/>
+    <line x1="387.6" y1="332.0" x2="256.0" y2="408.0"/>
+    <line x1="256.0" y1="408.0" x2="124.4" y2="332.0"/>
+    <line x1="124.4" y1="332.0" x2="124.4" y2="180.0"/>
+    <line x1="124.4" y1="180.0" x2="256.0" y2="104.0"/>
+  </g>
+  <circle cx="256" cy="256" r="152" fill="none" stroke="url(#ringGrad)" stroke-width="20" stroke-linecap="round" stroke-dasharray="278.3 40.0" stroke-dashoffset="139.2" transform="rotate(0 256 256)"/>
+  <g>
+    <circle cx="256.0" cy="104.0" r="16" fill="#1ec8fa"/>
+    <circle cx="387.6" cy="180.0" r="16" fill="#153a5e" stroke="#1ec8fa" stroke-width="7"/>
+    <circle cx="387.6" cy="332.0" r="16" fill="#1ec8fa"/>
+    <circle cx="256.0" cy="408.0" r="16" fill="#153a5e" stroke="#1ec8fa" stroke-width="7"/>
+    <circle cx="124.4" cy="332.0" r="16" fill="#1ec8fa"/>
+    <circle cx="124.4" cy="180.0" r="16" fill="#153a5e" stroke="#1ec8fa" stroke-width="7"/>
+  </g>
+  <circle cx="256" cy="256" r="92" fill="#0e2740" opacity="0.55"/>
+  <path d="M 256.0,184.0 L 273.0,232.5 L 324.5,233.8 L 283.6,265.0 L 298.3,314.2 L 256.0,285.0 L 213.7,314.2 L 228.4,265.0 L 187.5,233.8 L 239.0,232.5 Z" fill="#fab414" stroke="#c98800" stroke-width="4" stroke-linejoin="round"/>
+</svg>
