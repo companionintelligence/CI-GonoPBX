@@ -4,9 +4,20 @@
 
 <h1 align="center">CI-GonoPBX</h1>
 
+<p align="center"><strong>Build pipeline for publishing GonoPBX container images to the Companion Intelligence catalog.</strong></p>
+
+[![release](https://img.shields.io/badge/release-not%20published-757575?style=flat-square)](https://github.com/companionintelligence/CI-GonoPBX/releases)
+[![platform](https://img.shields.io/badge/platform-Docker%20%C2%B7%20linux%2Famd64%20%C2%B7%20linux%2Farm64-0a6358?style=flat-square)](https://github.com/companionintelligence/CI-GonoPBX)
+[![License](https://img.shields.io/badge/license-Review%20required-b42318?style=flat-square)](https://github.com/companionintelligence/CI-GonoPBX?tab=readme-ov-file#license)
+[![Discord](https://img.shields.io/badge/chat-Discord-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/invite/yQp9hwpzAa)
+
+<p align="center"><a href="https://github.com/companionintelligence/CI-GonoPBX">Source</a> · <a href="https://docs.ci.computer/docs/reference/open-source-systems">Systems map</a> · <a href="README.md#architecture">Documentation</a></p>
+
 <p align="center">
-Build pipeline that publishes container images for <a href="https://github.com/ankaios76/gonopbx">GonoPBX</a> — an open-source Asterisk PBX web GUI — to <code>ghcr.io/companionintelligence</code> so it can be listed in <a href="https://github.com/companionintelligence/CI-Marketplace">CI-Marketplace</a> (see <a href="https://github.com/companionintelligence/CI-Marketplace/issues/700">issue #700</a>, <a href="https://github.com/companionintelligence/CI-Marketplace/pull/703">PR #703</a>).
+  <a href="#triggering-a-build"><img src="https://img.shields.io/badge/Build%20container%20images-Build%20container%20images-0a6358?style=for-the-badge&logo=docker&logoColor=white" alt="Build container images" height="30"></a>
 </p>
+
+<p align="center">
 
 ## Why this repo exists
 
@@ -31,6 +42,16 @@ Upstream's README states the project is "open source and available under the [MI
 
 and link the resolution here.
 
+
+## Features
+
+| Feature | What it provides |
+|---|---|
+| **Upstream build** | Check out a selected GonoPBX ref and build its application images. |
+| **Multi-architecture publish** | Publish frontend, FastAPI and Asterisk container images. |
+| **Network boundary** | Proxy web/API/WebSocket through Nginx while SIP/RTP reaches Asterisk directly. |
+
+
 ## Screenshots
 
 Pulled from upstream's own [`website/screenshots`](https://github.com/ankaios76/gonopbx/tree/main/website/screenshots) (linked directly from [issue #700](https://github.com/companionintelligence/CI-Marketplace/issues/700)); mirrored here and in the CI-Marketplace store listing gallery.
@@ -42,6 +63,20 @@ Pulled from upstream's own [`website/screenshots`](https://github.com/ankaios76/
 | SIP trunks | Call history |
 |---|---|
 | ![SIP trunks](docs/assets/03-sip-trunks.png) | ![Call history](docs/assets/04-call-history.png) |
+
+
+## How it fits together
+
+A workflow builds upstream frontend, API and Asterisk images and publishes them; Nginx handles web/API/WebSocket traffic, while SIP and RTP reach Asterisk directly.
+
+```mermaid
+flowchart LR
+  Ref[Selected upstream ref] --> Workflow[Build and publish workflow]
+  Workflow --> Registry[Multi-arch image registry]
+  Browser[Web traffic] --> Nginx[Nginx proxy]
+  Nginx --> Frontend[Frontend and API]
+  Phone[SIP and RTP clients] --> Asterisk[Asterisk media]
+```
 
 ## Architecture
 
@@ -117,3 +152,22 @@ sequenceDiagram
 ## Icon
 
 The store icon (`docs/assets/icon.png`, source `docs/assets/icon.svg`) is an original vector redraw of GonoPBX's own mark — the broken ring of connected nodes represents extensions/endpoints meshed through the PBX hub, and the center star nods to Asterisk (the engine underneath, and literally "a little star"). The original upstream logo is a wide wordmark lockup (`docs/assets/wordmark.png`) that doesn't crop cleanly to the square tile CI-Marketplace store listings need, so this repo maintains a proper square icon derived from the same visual language instead.
+
+<!-- companion-hub-readme-deep-review -->
+
+## Build outputs and network requirements
+
+| Image | Role |
+|---|---|
+| Frontend | Nginx UI and HTTP proxy for `/api` and `/ws` |
+| Backend | FastAPI application and API/websocket handling |
+| Asterisk | SIP/PBX services; SIP and RTP traffic reaches this container directly |
+
+| Build setting | Current workflow behavior |
+|---|---|
+| Trigger | Manual `workflow_dispatch` |
+| Source ref | `gonopbx_ref` input, default `v2.1.1` |
+| Published architecture | `linux/amd64` and `linux/arm64` requested by the build workflow |
+
+Allow the required SIP and RTP ports through the host/network firewall; HTTP proxying through the frontend does not carry media traffic. The licensing warning above remains a release gate: verify upstream licensing before redistributing the images.
+
