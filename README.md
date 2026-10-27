@@ -119,3 +119,22 @@ sequenceDiagram
 ## Icon
 
 The store icon (`docs/assets/icon.png`, source `docs/assets/icon.svg`) is an original vector redraw of GonoPBX's own mark — the broken ring of connected nodes represents extensions/endpoints meshed through the PBX hub, and the center star nods to Asterisk (the engine underneath, and literally "a little star"). The original upstream logo is a wide wordmark lockup (`docs/assets/wordmark.png`) that doesn't crop cleanly to the square tile CI-Marketplace store listings need, so this repo maintains a proper square icon derived from the same visual language instead.
+
+<!-- companion-hub-readme-deep-review -->
+
+## Build outputs and network requirements
+
+| Image | Role |
+|---|---|
+| Frontend | Nginx UI and HTTP proxy for `/api` and `/ws` |
+| Backend | FastAPI application and API/websocket handling |
+| Asterisk | SIP/PBX services; SIP and RTP traffic reaches this container directly |
+
+| Build setting | Current workflow behavior |
+|---|---|
+| Trigger | Manual `workflow_dispatch` |
+| Source ref | `gonopbx_ref` input, default `v2.1.1` |
+| Published architecture | `linux/amd64` and `linux/arm64` requested by the build workflow |
+
+Allow the required SIP and RTP ports through the host/network firewall; HTTP proxying through the frontend does not carry media traffic. The licensing warning above remains a release gate: verify upstream licensing before redistributing the images.
+
