@@ -4,9 +4,11 @@
 
 <h1 align="center">CI-GonoPBX</h1>
 
+<p align="center"><strong>Build pipeline for publishing GonoPBX container images to the Companion Intelligence catalog.</strong></p>
+
+<p align="center"><a href="https://github.com/companionintelligence/CI-GonoPBX">Source</a></p>
+
 <p align="center">
-Build pipeline that publishes container images for <a href="https://github.com/ankaios76/gonopbx">GonoPBX</a> — an open-source Asterisk PBX web GUI — to <code>ghcr.io/companionintelligence</code> so it can be listed in <a href="https://github.com/companionintelligence/CI-Marketplace">CI-Marketplace</a> (see <a href="https://github.com/companionintelligence/CI-Marketplace/issues/700">issue #700</a>, <a href="https://github.com/companionintelligence/CI-Marketplace/pull/703">PR #703</a>).
-</p>
 
 ## Why this repo exists
 
