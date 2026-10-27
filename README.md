@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Build pipeline for publishing GonoPBX container images to the Companion Intelligence catalog.</strong></p>
 
-<p align="center"><a href="https://github.com/companionintelligence/CI-GonoPBX">Source</a></p>
+<p align="center"><a href="https://github.com/companionintelligence/CI-GonoPBX">Source</a> · <a href="https://docs.ci.computer/docs/reference/open-source-systems">Systems map</a></p>
 
 <p align="center">
 
